@@ -16,7 +16,9 @@ create a mail task
 - [x] Read a recipients CSV list, validate input
 - [x] Define field from available headers to be used for email sending, validate email addresses
 - [ ] Read message from stdin or file as txt or html, support templating with format()
-- [ ] Add reminders for a mail task
+- [ ] Add reminders for a mail task, using ODK API, http-lib
+- [ ] Send mail manually or schedule for the future; smtp, python-crontab
+
 
 list mail tasks
 - [ ] Show available mail tasks (that are stored in the local db)
