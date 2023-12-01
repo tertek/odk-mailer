@@ -8,6 +8,8 @@ Built with Typer and packaged with Poetry.
 
 Building a Package - Guide: https://typer.tiangolo.com/tutorial/package/#create-your-app
 
+
+
 ## Features > commands
 
 create a mail task
@@ -33,6 +35,10 @@ check connection
 - [ ] give instant feedback about connectivity to SMTP and API endpoints
 
 ## Development
+
+**Requirements**
+- Python 3.10
+- Poetry 1.7
 
 ```bash
     # clone the repo and cd into
