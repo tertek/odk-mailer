@@ -1,4 +1,6 @@
-firstname
-foo,bar;foo@bar.com
-hoo,mar hoo@mar.com
-fasdasd,a,a
+firstname, lastname, email
+foo, bar, foobar.com
+hoo,mar hoo.@mar.com
+hoo,mar, hoo.@mar.com
+soo,car, soo@carcom,
+

@@ -1,12 +1,6 @@
 import typer
 from odk_mailer import commands
 
-from rich.console import Console
-from rich.table import Table
-
-from odk_mailer.classes.recipients import Recipients
-import csv
-
 from odk_mailer.classes.odk_api import ODKClient
 
 
@@ -21,6 +15,7 @@ def callback():
 
     A new mail job will be created for given CSV_FILE, EMAIL_FIELD, MESSAGE_TEXT and additional options.
     """
+    # read config here from $HOME/.odk-mailer
 
 
 @app.command()
@@ -59,4 +54,5 @@ def list():
     List available mail jobs
     """
     typer.echo("Listing mail jobs")
+
 
