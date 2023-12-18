@@ -54,7 +54,7 @@ class Recipients:
                     if not email:
                         raise EmailNotValidError("Email address missing. Check for missing delimiters (',') in your CSV file.")
                     # Disable DNS checks since this can be blocked for unknown reasons within network.
-                    validate_email(email, check_deliverability=False)
+                    validate_email(email, check_deliverability=True)
                 except EmailNotValidError as e:
                     invalid = [str(total) ,email, str(e)]
                     invalid_emails.append(invalid)

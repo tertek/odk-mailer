@@ -25,10 +25,9 @@ def create(csv_file, email_field, message_text):
     if email_field not in headers:
         raise typer.Exit("Invalid email_field. Terminating.")
 
-
     # validate recipients and process invalid emails in case
     if not recipients.validate(email_field):
-        utils.render_table(["id", "email_field", "error"], recipients.invalid_emails)
+        utils.render_table(["id", "email_field", "error"], recipients.invalidEmails)
         ignore_invalid_emails = typer.confirm("Invalid emails found. Would you like to continue although you have invalid emails?")
     
         if not ignore_invalid_emails:
