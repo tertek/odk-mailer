@@ -2,7 +2,7 @@ import typer
 from odk_mailer.lib import prompts, utils
 from odk_mailer.classes.recipients import Recipients 
 
-def create(csv_file, email_field):
+def create(csv_file, email_field, message_text):
     typer.echo(">>> Creating mail task")
     # Step 1: Ask for CSV file path (or URL)
 
@@ -25,10 +25,10 @@ def create(csv_file, email_field):
     if email_field not in headers:
         raise typer.Exit("Invalid email_field. Terminating.")
 
-    recipients.validate_email(email_field)
-    invalid_emails = utils.get_invalid(recipients.data, email_field)
-    if invalid_emails:
-        utils.render_table(["id", "email_field", "error"], invalid_emails)
+
+    # validate recipients and process invalid emails in case
+    if not recipients.validate(email_field):
+        utils.render_table(["id", "email_field", "error"], recipients.invalid_emails)
         ignore_invalid_emails = typer.confirm("Invalid emails found. Would you like to continue although you have invalid emails?")
     
         if not ignore_invalid_emails:
@@ -39,7 +39,14 @@ def create(csv_file, email_field):
     # if true: ask for message file path 
     # if false: open editor for message content and store in temporary folder
     
-    answer_message = typer.prompt("What is the mail message?")
+    # prompt message text
+    if not message_text:
+        answer_message = typer.prompt("What is the mail message?")
+        message_text = answer_message
+
+    # Success
+    print(f"Success. Created job with {recipients.numEmails} mails to be sent.")        
+    typer.echo(recipients.data)
 
     # Replace placeholder with variables using pyhton template engine
     # We will need dictionary for that..

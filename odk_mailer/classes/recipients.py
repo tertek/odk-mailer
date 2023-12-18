@@ -2,6 +2,7 @@ import typer
 import os
 import csv
 from collections import defaultdict
+from email_validator import validate_email, EmailNotValidError
 
 # return unformatted string instead of raising error
 # when key is missing within dictionary
@@ -16,6 +17,10 @@ class Recipients:
         self.fieldnames = []
         self.data = []
 
+        self.isValid = False
+        self.invalidEmails = []
+
+        # Initialize 
         self.init()
 
     def init(self):
@@ -36,32 +41,35 @@ class Recipients:
             for row in reader:
                 self.data.append(row)
 
-    def validate_email(self, email_field):
+    def validate(self, email_field):
         invalid_emails = []
-        valid = False
         total = 0
 
         print("\nValidating recipients...")
-        with typer.progressbar(emails) as progress:
+        with typer.progressbar(self.data) as progress:
             for row in progress:
                 total += 1
-                email = row[field]
+                email = row[email_field]
                 try:
                     if not email:
                         raise EmailNotValidError("Email address missing. Check for missing delimiters (',') in your CSV file.")
-                    validate_email(email)
+                    # Disable DNS checks since this can be blocked for unknown reasons within network.
+                    validate_email(email, check_deliverability=False)
                 except EmailNotValidError as e:
                     invalid = [str(total) ,email, str(e)]
                     invalid_emails.append(invalid)
                 
         print(f"Validated {total} entries.\n")
+
+        self.invalidEmails = invalid_emails
+        self.numEmails = len(self.data)
         
         if len(invalid_emails) == 0:
-            valid = True
-        
-        return valid, invalid_emails
+            self.isValid = True
 
-    def test(self):
+        return self.isValid
+
+    def test_filling(self):
         print(self.fieldnames)
         print(f'file path is {self.path}')
         
