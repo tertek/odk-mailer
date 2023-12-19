@@ -1,14 +1,25 @@
 # ODK Mailer
 
-*stil under development*
-
 A simple CLI to send Mails for ODK.
-
 Built with Typer and packaged with Poetry.
 
-Building a Package - Guide: https://typer.tiangolo.com/tutorial/package/#create-your-app
+## Requirements
+- Python 3
+- PIP
 
+## Setup
+```bash
+pip install odk-mailer
+```
 
+## Usage
+```bash
+    odk-mailer create
+```
+
+## CLI Design
+### Create
+![odk-mailer-flow](odk-mailer-create-flow.png)
 
 ## Features > commands
 
@@ -37,6 +48,7 @@ check connection
 - [ ] give instant feedback about connectivity to SMTP and API endpoints
 
 ## Development
+Building a Package - Guide: https://typer.tiangolo.com/tutorial/package/#create-your-app
 
 **Requirements**
 - Python 3.10
