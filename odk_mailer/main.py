@@ -3,7 +3,6 @@ from odk_mailer import commands
 
 from odk_mailer.classes.odk_api import ODKClient
 
-
 app = typer.Typer(add_completion=False)
 
 @app.callback()
@@ -20,16 +19,19 @@ def callback():
 
 @app.command()
 def create(
-    csv_file: str = "",
+    source_type: str = "",
+    source_path: str = "",
     email_field: str = "",
-    message_text: str = ""
+    data_fields: str = "",
+    message: str = "",
+    schedule: str = ""
 ):
     """
     Create a mail job, optionally with --csv-file, --email-field, --message-text.
     If these are not entered, user will be prompted.
     """
 
-    commands.create(csv_file, email_field, message_text)
+    commands.create(source_type, source_path, email_field, data_fields, message, schedule)
 
 @app.command()
 def api():

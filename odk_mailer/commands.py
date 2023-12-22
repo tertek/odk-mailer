@@ -1,47 +1,80 @@
 import typer
+import sys
 from odk_mailer.lib import prompts, utils
 from odk_mailer.classes.recipients import Recipients 
+from odk_mailer.classes.mail_job import MailJob 
 
-def create(csv_file, email_field, message_text):
-    typer.echo(">>> Creating mail task")
-    # Step 1: Ask for CSV file path (or URL)
 
-    message:str
+def create(source_type, source_path, email_field, data_fields, message, schedule):
+    typer.echo(">>> Creating mail job")
 
-    # prompt csv_file if no csv file path is set
-    if not csv_file:
-        answer_csv_file = prompts.csv_file()
-        csv_file = answer_csv_file
+    # prompt source type
+    if not source_type:
+        answer_source_type = prompts.source_type()
+        source_type = answer_source_type["source_type"]
 
-    recipients = Recipients(csv_file)
-    headers = recipients.fieldnames
+    mailJob = MailJob(source_type)
 
+    # prompt source path
+    if mailJob.source_type == 'file':
+        if not source_path:
+            answer_source_path_file = prompts.source_path_file()
+            source_path = answer_source_path_file["source_path_file"]
+    elif mailJob.source_type == 'api':
+        # check API connection & credentials
+        # promptAPIcredentials() // host, user, pass, project
+        # checkAPIconnection()  // auth endpoint
+        if not source_path:
+            answer_source_path = prompts.source_path_api()
+    else:
+        raise Exception("Something went wrong.")
+      
+    mailJob.setSourcePath(source_path)
+    
     # prompt email filed as list
     if not email_field:
-        answer_email_field = prompts.email_field(headers)
-        email_field = answer_email_field
+        answer_email_field = prompts.email_field(mailJob.headers)
+        email_field = answer_email_field["email_field"]
+    
+    mailJob.setEmailField(email_field)
 
-    # get index within headers
-    if email_field not in headers:
-        raise typer.Exit("Invalid email_field. Terminating.")
+    if not data_fields:
+        answer_data_fields = prompts.data_fields( list(filter(lambda x: x != mailJob.email_field, mailJob.headers)) )
+        data_fields = answer_data_fields["data_fields"]
+
+    mailJob.setDataFields(data_fields)
+
+    # prompt message input string that is going to be split into list
+    if not message:
+        answer_message = prompts.message()
+        message = answer_message["message_sender"] + ":" + answer_message["message_format"] + ":" + answer_message["message_source"] + ":" + answer_message["message_content"]
+
+    mailJob.setMessage(message)
+
+    if not schedule:
+        answer_schedule = prompts.schedule()
+        if answer_schedule["schedule_now"]:
+            schedule = "now"
+        else:
+            schedule = answer_schedule["schedule_datetime"]
+        
+    mailJob.setSchedule(schedule)
+
+    # tbd: add reminders
+
+    utils.render_summary()
+
+    
+    sys.exit()
 
     # validate recipients and process invalid emails in case
-    if not recipients.validate(email_field):
-        utils.render_table(["id", "email_field", "error"], recipients.invalidEmails)
-        ignore_invalid_emails = typer.confirm("Invalid emails found. Would you like to continue although you have invalid emails?")
+    # if not recipients.validate(email_field):
+    #     utils.render_table(["id", "email_field", "error"], recipients.invalidEmails)
+    #     ignore_invalid_emails = typer.confirm("Invalid emails found. Would you like to continue although you have invalid emails?")
     
-        if not ignore_invalid_emails:
-            raise typer.Exit("\nAborted.")
+    #     if not ignore_invalid_emails:
+    #         raise typer.Exit("\nAborted.")
 
-    # prompt message content as editor
-    # Do you have a message template ready?
-    # if true: ask for message file path 
-    # if false: open editor for message content and store in temporary folder
-    
-    # prompt message text
-    if not message_text:
-        answer_message = typer.prompt("What is the mail message?")
-        message_text = answer_message
 
     # Success
     print(f"Success. Created job with {recipients.numEmails} mails to be sent.")        
