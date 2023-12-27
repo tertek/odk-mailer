@@ -112,14 +112,9 @@ def schedule():
 
     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
-
-# def csv_file():
-#     questions = [
-#     inquirer.Path('csv_file',
-#                     message="Where is the recipients csv_file located?",
-#                     path_type=inquirer.Path.FILE,
-#                     exists=True
-#                     ),
-#     ]
-
-#     return inquirer.prompt(questions)
+def confirm():
+    return inquirer.prompt(
+        [
+            inquirer.Confirm("confirm", message="Create MailJob?")
+        ], 
+        raise_keyboard_interrupt=True)
