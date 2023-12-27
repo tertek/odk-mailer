@@ -5,7 +5,7 @@ from odk_mailer.classes.recipients import Recipients
 from odk_mailer.classes.mail_job import MailJob 
 
 
-def create(source_type, source_path, email_field, data_fields, message, schedule):
+def create(source_type, source_path, email_field, data_fields, message, schedule, force):
     typer.echo(">>> Creating mail job")
 
     # prompt source type
@@ -16,11 +16,11 @@ def create(source_type, source_path, email_field, data_fields, message, schedule
     mailJob = MailJob(source_type)
 
     # prompt source path
-    if mailJob.source_type == 'file':
+    if mailJob.source["type"] == 'file':
         if not source_path:
             answer_source_path_file = prompts.source_path_file()
             source_path = answer_source_path_file["source_path_file"]
-    elif mailJob.source_type == 'api':
+    elif mailJob.source["type"] == 'api':
         # check API connection & credentials
         # promptAPIcredentials() // host, user, pass, project
         # checkAPIconnection()  // auth endpoint
@@ -60,11 +60,22 @@ def create(source_type, source_path, email_field, data_fields, message, schedule
         
     mailJob.setSchedule(schedule)
 
+    #
     # tbd: add reminders
+    #
 
-    utils.render_summary()
+    # optional: confirm mailjob on summary
+    # utils.render_summary(mailJob)
+    # if not force:
+    #     answer_confirmed = prompts.confirm()
+    #     confirmed = answer_confirmed["confirm"]
+    # else: confirmed = force
 
-    
+    # if not confirmed:
+    #     raise typer.Exit("MailJob was not confirmed.")
+
+    mailJob._create()
+
     sys.exit()
 
     # validate recipients and process invalid emails in case

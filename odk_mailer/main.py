@@ -1,5 +1,5 @@
 import typer
-from odk_mailer import commands
+from odk_mailer import commands, before
 
 from odk_mailer.classes.odk_api import ODKClient
 
@@ -15,6 +15,8 @@ def callback():
     A new mail job will be created for given CSV_FILE, EMAIL_FIELD, MESSAGE_TEXT and additional options.
     """
     # read config here from $HOME/.odk-mailer
+    before.init()
+
 
 
 @app.command()
@@ -24,14 +26,15 @@ def create(
     email_field: str = "",
     data_fields: str = "",
     message: str = "",
-    schedule: str = ""
+    schedule: str = "",
+    force: bool = False
 ):
     """
     Create a mail job, optionally with --csv-file, --email-field, --message-text.
     If these are not entered, user will be prompted.
     """
 
-    commands.create(source_type, source_path, email_field, data_fields, message, schedule)
+    commands.create(source_type, source_path, email_field, data_fields, message, schedule, force)
 
 @app.command()
 def api():

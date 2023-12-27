@@ -1,33 +1,39 @@
+from odk_mailer.lib import globals
 from datetime import datetime
 import time
 import os
 import typer
 import csv
 import re
+import json
+import hashlib
+
 
 class MailJob:
     def __init__(self, type: str):
-        self.source_type = type
-        self.source_path = ""
-        self.email_field = ""
-        self.data_fields = []
-        self.createdAt = ""
-        self.message = {}
-        self.schedule_datetime = ""
-
+        self.created = int(time.time())
+        self.source = {
+            "type": type,
+            "path": ""
+        }
         self.headers = []
         self.recipients = []
+        self.fields = {
+            "email": "",
+            "data": []
+        } 
+        self.message = {}
+        self.scheduled = ""
 
-
-        self.init()
+        #self.init()
 
     def init(self):
-        self.createdAt = int(time.time())
+        self.created = int(time.time())
 
     def setSourcePath(self, path:str):
 
         # validate type: file
-        if self.source_type == "file":
+        if self.source["type"] == "file":
             # invalid file extension
             ext = os.path.splitext(path)[-1].lower()
             if not ext == ".csv":
@@ -37,9 +43,9 @@ class MailJob:
             if not os.path.isfile(path):
                 raise typer.Exit("Invalid file path.")
             
-            self.source_path = path
+            self.source["path"] = path
             # read data
-            with open(self.source_path, newline='') as f:
+            with open(self.source["path"], newline='') as f:
                 reader = csv.DictReader(f, skipinitialspace=True)
                 self.headers = reader.fieldnames
                 for row in reader:
@@ -50,7 +56,7 @@ class MailJob:
         if email not in self.headers:
             raise typer.Exit("Invalid email_field. Terminating.")
         
-        self.email_field = email
+        self.fields["email"] = email
 
     def setDataFields(self, fields):
         # in case user enters data fields as comma separated string
@@ -68,7 +74,7 @@ class MailJob:
         else:
             raise Exception("Invalid data fields type")
         
-        self.data_fields = data_fields
+        self.fields["data"] = data_fields
 
     def setMessage(self, msg: str):
         message = msg.split(":")
@@ -97,14 +103,66 @@ class MailJob:
         }
 
     # tbd: check UTC timezone behaviour and adjust accordingly
+    # tbd: check if scheduled time is in future 
     def setSchedule(self, date_str):
         if date_str == "now":
-            self.schedule_datetime = int(time.time())
+            self.scheduled = self.created
         else: 
-            #tbd date format validation
+            # tbd: date format validation
             # exit if not YYYY-DD-MM hh:mm
             _datetime = datetime.fromisoformat(date_str)
-            self.schedule_datetime = int(datetime.timestamp(_datetime))
+            self.scheduled = int(datetime.timestamp(_datetime))
+
 
     def getSummary(self):
-        typer.echo(self)
+        return {
+            "created": self.created,
+            "scheduled": self.scheduled,
+            "source": self.source,
+            "fields": self.fields,
+            "message": self.message,
+            "recipients": self.recipients            
+        }
+
+    # does two things: saves mailjob as <hash>.json and adds it as an entry to jobs.json with hash as id
+    def _create(self):
+        jobs_dir = globals.odk_mailer_path + '/jobs'
+        jobs_file = globals.odk_mailer_path + '/jobs.json'
+
+        # get content as json
+        content = json.dumps(self.getSummary(), ensure_ascii=True, indent=4)
+        hash = hashlib.sha256(content.encode()).hexdigest()
+
+        with open(jobs_dir + '/'+hash+'.json', 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        # with open(jobs_file, "r+") as json_file:
+        #     print(json_file.read())
+
+        with open(jobs_file, "r+") as json_file:
+            jobs = json.load(json_file)
+            jobs.append({"hash": hash, "scheduled": self.scheduled, "state":0, "last_checked": ""})
+            json_file.write(json.dumps(jobs))
+
+        print("Success")
+
+        # we want to add an entry to jobs.json: 
+        # therefore we have to 1) read the file into an object
+        # add an element to the object
+        # object format: [{hash, scheduled, state, last_checked},{}.{}]
+
+        # write into jobs.json > id, scheduled, state        
+
+        
+        
+
+
+    def saveJSON(self):
+
+        path = globals.odk_mailer_path + '/jobs'
+        content = json.dumps(self.getSummary(), ensure_ascii=False, indent=4)
+        hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+
+        with open(path + '/'+hash+'.json', 'w', encoding='utf-8') as f:
+            f.write(content)
+            
