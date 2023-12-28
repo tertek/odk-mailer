@@ -1,6 +1,7 @@
 from inquirer import errors
 import inquirer
 import re
+from odk_mailer.lib import validators
 
 def source_type():
     questions = [
@@ -16,7 +17,7 @@ def source_type():
     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
 def source_path_file():
-    # check if string is local file path or URL to remote CSV file in format https://*.<tld>/**/*.csv
+    # tbd: check if string is local file path or URL to remote CSV file in format https://*.<tld>/**/*.csv
     questions = [
         inquirer.Path('source_path_file',
                     message="Input local path to CSV file",
@@ -84,16 +85,6 @@ def message():
     ]
     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
-def validation_schedule_date(_, current):
-    # valdidate format
-    re_YYYY_MM_DD_hh_mm = "[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]"
-    if not re.search(re_YYYY_MM_DD_hh_mm, current):
-        raise errors.ValidationError('', 'Invalid date format. Has to be YYYY-MM-DD hh:mm')
-       
-    return True
-    
-
-
 def schedule():
     questions = [
         inquirer.List('schedule_now',
@@ -106,7 +97,7 @@ def schedule():
         inquirer.Text('schedule_datetime',
                       message="Input schedule time and date",
                       ignore=lambda x: x["schedule_now"] == True,
-                      validate= validation_schedule_date
+                      validate= validators.date_format
         )
     ]
 
