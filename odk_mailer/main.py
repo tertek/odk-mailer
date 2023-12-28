@@ -21,20 +21,23 @@ def callback():
 
 @app.command()
 def create(
-    source_type: str = "",
-    source_path: str = "",
-    email_field: str = "",
-    data_fields: str = "",
+    source: str = "",
+    fields: str = "",
+    # source_type: str = "",
+    # source_path: str = "",
+    # email_field: str = "",
+    # data_fields: str = "",
     message: str = "",
     schedule: str = "",
-    force: bool = False
+    # force: bool = False
+    
 ):
     """
     Create a mail job, optionally with --csv-file, --email-field, --message-text.
     If these are not entered, user will be prompted.
     """
 
-    commands.create(source_type, source_path, email_field, data_fields, message, schedule, force)
+    commands.create(source, fields, message, schedule)
 
 @app.command()
 def api():

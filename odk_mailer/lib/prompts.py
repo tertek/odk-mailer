@@ -1,103 +1,163 @@
 from inquirer import errors
 import inquirer
-import re
-from odk_mailer.lib import validators
+from odk_mailer.lib import validators, utils
 
-def source_type():
+def source():
     questions = [
-        inquirer.List('source_type', 
+        inquirer.List('type', 
                     message="Select source type:",
                     choices= [
                         ("CSV file.", "file"),
                         ("ODK API", "api")
                     ],                      
                     carousel=True
-        )
-    ]
-    return inquirer.prompt(questions, raise_keyboard_interrupt=True)
-
-def source_path_file():
-    # tbd: check if string is local file path or URL to remote CSV file in format https://*.<tld>/**/*.csv
-    questions = [
-        inquirer.Path('source_path_file',
+        ),
+        inquirer.Path('file_path',
                     message="Input local path to CSV file",
                     path_type=inquirer.Path.FILE,
                     exists=True,
-                    normalize_to_absolute_path=True
+                    normalize_to_absolute_path=True,
+                    ignore=lambda x: x["type"] == "api"
+        ),
+        inquirer.Text('api_form',
+                    message="Input form/attachment name",                      
+                    ignore=lambda x: x["type"] == "file"
+                    #tbd: add regex valdation
+        ),
+        inquirer.Text('api_proj',
+                    message="Input project id",
+                    validate= validators.int_only,
+                    ignore=lambda x: x["type"] == "file"
+        ),
+        inquirer.Text('api_host',
+                    message="Input ODK host url",
+                    ignore=lambda x: x["type"] == "file",
+                    # tbd validate url, https
+        ),
+        inquirer.Text('api_user',
+                    message="Input ODK username",
+                    ignore=lambda x: x["type"] == "file"
+        ),
+        inquirer.Password('api_pass',
+                    message="Input ODK password",
+                    ignore=lambda x: x["type"] == "file"
         )
     ]
     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
-def email_field(headers=[]):
+def fields(headers=[]):
     questions = [
-    inquirer.List('email_field',
-                    message="What field should be used for sending emails?",
+        inquirer.List('email',
+                    message="Select email field",
                     choices=headers,
                     default='email' if 'email' in headers else "",
                     carousel=True
-                ),
+        ),
+        inquirer.Checkbox("data", 
+                    message="Select data field(s)",
+                    choices= lambda x: filter(lambda y: y != x["email"], headers)
+        )        
     ]
     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
-def data_fields(headers=[]):
-    questions = [
-        inquirer.Checkbox("data_fields", 
-                    message="Select data field(s)",
-                    choices=headers
-        )
-    ]
-    return inquirer.prompt(questions, raise_keyboard_interrupt=True)
+
+# def source_type():
+#     questions = [
+#         inquirer.List('source_type', 
+#                     message="Select source type:",
+#                     choices= [
+#                         ("CSV file.", "file"),
+#                         ("ODK API", "api")
+#                     ],                      
+#                     carousel=True
+#         )
+#     ]
+#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
+
+# def source_path_file():
+#     # tbd: check if string is local file path or URL to remote CSV file in format https://*.<tld>/**/*.csv
+#     questions = [
+#         inquirer.Path('source_path_file',
+#                     message="Input local path to CSV file",
+#                     path_type=inquirer.Path.FILE,
+#                     exists=True,
+#                     normalize_to_absolute_path=True
+#         )
+#     ]
+#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
+
+# def email_field(headers=[]):
+#     questions = [
+#     inquirer.List('email_field',
+#                     message="What field should be used for sending emails?",
+#                     choices=headers,
+#                     default='email' if 'email' in headers else "",
+#                     carousel=True
+#                 ),
+#     ]
+#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
+
+# def data_fields(headers=[]):
+#     questions = [
+#         inquirer.Checkbox("data_fields", 
+#                     message="Select data field(s)",
+#                     choices=headers
+#         )
+#     ]
+#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
 def message():
     questions = [
-        inquirer.Text('message_sender',
-                      message="Input message sender",
-                      default="odk@swisstph.ch"
-                      #tbd: add email regex validation
+        inquirer.Text('sender',
+                    message="Input message sender",
+                    default="odk@swisstph.ch",  # remove
+                    validate=validators.email_address                      
         ),
-        inquirer.List('message_format', 
-                      message="Select message format:",
-                      choices= [
-                          ("Text", "txt"),
-                          ("HTML", "html")
-                          ],                      
-                      carousel=True
+        inquirer.List('format', 
+                    message="Select message format:",
+                    choices= [
+                        ("Text", "txt"),
+                         ("HTML", "html")
+                    ],                      
+                    carousel=True
         ),
-        inquirer.List('message_source', 
-                      message="Select message source:",
-                      choices= [
-                          ("Input as string", "stdin"),
-                          ("File from path", "path")
-                          ],                      
-                      carousel=True
-                      ),        
-        inquirer.Text('message_content',
-                      message="Input message string",
-                      ignore=lambda x: x["message_source"] != "stdin"
+        inquirer.List('source', 
+                    message="Select message source:",
+                    choices= [
+                        ("Input as string", "stdin"),
+                        ("File from path", "path")
+                    ],                      
+                    carousel=True
+        ),        
+        inquirer.Text('content_stdin',
+                    message="Input message string",
+                    ignore=lambda x: x["source"] != "stdin",
+                    validate= validators.not_empty
         ),
-        inquirer.Path('message_content',
-                      message="Message file path",
-                      ignore=lambda x: x["message_source"] != "path",
-                      path_type=inquirer.Path.FILE,
-                      exists=True,
-                      normalize_to_absolute_path=True
+        inquirer.Path('content_path',
+                    message="Message file path",
+                    path_type=inquirer.Path.FILE,
+                    exists=True,
+                    normalize_to_absolute_path=True,
+                    ignore=lambda x: x["source"] != "path"
+                    
         )
     ]
     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
 def schedule():
     questions = [
-        inquirer.List('schedule_now',
-                      message="Send immediately now or schedule for later?",
-                      choices=[
-                          ("Send now",True),
-                          ("Schedule for later", False)
-                      ]
+        inquirer.List('now',
+                    message="Send immediately now or schedule for later?",
+                    choices=[
+                        ("Send now",True),
+                        ("Schedule for later", False)
+                    ]
         ),
-        inquirer.Text('schedule_datetime',
-                      message="Input schedule time and date",
-                      ignore=lambda x: x["schedule_now"] == True,
-                      validate= validators.date_format
+        inquirer.Text('future',
+                    message="Input schedule time and date",
+                    ignore=lambda x: x["now"] == True,
+                    validate= validators.date_format
         )
     ]
 

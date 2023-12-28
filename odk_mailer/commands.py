@@ -1,64 +1,43 @@
 import typer
 import sys
-from odk_mailer.lib import prompts, utils
-from odk_mailer.classes.recipients import Recipients 
+from odk_mailer.lib import prompts, validators, utils, log
 from odk_mailer.classes.job import Job 
 
 
-def create(source_type, source_path, email_field, data_fields, message, schedule, force):
+def create(source, fields, message, schedule):
     typer.echo(">>> Creating a mail job")
 
-    # prompt source type
-    if not source_type:
-        answer_source_type = prompts.source_type()
-        source_type = answer_source_type["source_type"]
-
-    mailJob = Job(source_type)
-
-    # prompt source path
-    if mailJob.source["type"] == 'file':
-        if not source_path:
-            answer_source_path_file = prompts.source_path_file()
-            source_path = answer_source_path_file["source_path_file"]
-    elif mailJob.source["type"] == 'api':
-        # check API connection & credentials
-        # promptAPIcredentials() // host, user, pass, project
-        # checkAPIconnection()  // auth endpoint
-        if not source_path:
-            answer_source_path = prompts.source_path_api()
-    else:
-        raise Exception("Something went wrong.")
-      
-    mailJob.setSourcePath(source_path)
+    if not source:
+        p_source = prompts.source()
+        source  = utils.join(p_source)    
     
-    # prompt email filed as list
-    if not email_field:
-        answer_email_field = prompts.email_field(mailJob.headers)
-        email_field = answer_email_field["email_field"]
-    
-    mailJob.setEmailField(email_field)
+    v_source = validators.source(source)
 
-    if not data_fields:
-        answer_data_fields = prompts.data_fields( list(filter(lambda x: x != mailJob.email_field, mailJob.headers)) )
-        data_fields = answer_data_fields["data_fields"]
+    # Get raw data
+    raw = utils.get_raw(v_source)
 
-    mailJob.setDataFields(data_fields)
+    if not fields:
+        p_fields = prompts.fields(raw["headers"])    
+        fields = utils.join(p_fields)
 
-    # prompt message input string that is going to be split into list
+    v_fields = validators.fields(fields, raw["headers"])
+
     if not message:
-        answer_message = prompts.message()
-        message = answer_message["message_sender"] + ":" + answer_message["message_format"] + ":" + answer_message["message_source"] + ":" + answer_message["message_content"]
+        p_message = prompts.message()
+        message = utils.join(p_message)
 
-    mailJob.setMessage(message)
+    v_message = validators.message(message)    
 
     if not schedule:
-        answer_schedule = prompts.schedule()
-        if answer_schedule["schedule_now"]:
+        p_schedule = prompts.schedule()
+        if p_schedule["now"]:
             schedule = "now"
-        else:
-            schedule = answer_schedule["schedule_datetime"]
-        
-    mailJob.setSchedule(schedule)
+        else: schedule=p_schedule["future"]
+
+    v_schedule = validators.schedule(schedule)
+
+
+    # mailJob.setSchedule(schedule)
 
     #
     # tbd: add reminders
@@ -74,7 +53,9 @@ def create(source_type, source_path, email_field, data_fields, message, schedule
     # if not confirmed:
     #     raise typer.Exit("MailJob was not confirmed.")
 
-    mailJob.save()
+    # mailJob.save()
+
+    # run mail job
 
     sys.exit()
 

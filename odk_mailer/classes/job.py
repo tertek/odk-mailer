@@ -1,13 +1,67 @@
 from odk_mailer.lib import globals
 from datetime import datetime
 import time
-import os
-import typer
-import csv
-import re
 import json
 import hashlib
+from enum import Enum
 
+class JobType(Enum):
+    FILE = 'file'
+    API = 'api'
+
+class Source:
+    type: str
+    path: str
+    project: int
+    hostname: str
+    username: str
+    password: str
+
+    def __init__(self, lst: []):
+        if not len(lst) in [2,6]:
+            raise Exception("Source input must have length 2 or 6.")
+        
+        self.type = JobType(lst[0]).value
+        self.path = lst[1]
+        if len(lst) == 6:
+            self.project = int(lst[2])
+            self.hostname = lst[3]
+            self.username = lst[4]
+            self.password = lst[5]
+
+class Fields:
+    email: str
+    data: []
+
+    def __init__(self, lst: []):
+        if not len(lst) in [1,2]:
+            raise Exception("Fields input must have length 1 or 2.")
+        
+        self.email = lst[0]
+        # data fields are optional
+        if len(lst) == 2:
+            self.data = lst[1].split(",")
+
+class Message:
+    sender: str
+    format: str
+    source: str
+    content: str
+
+    def __init__(self, lst: []):
+        if not len(lst) == 4:
+            raise Exception("Message input must have length 4.")
+                
+        self.sender = lst[0]
+        self.format = lst[1]
+        self.source = lst[2]
+        self.content = lst[3]        
+
+class Schedule:
+    timestamp: int
+
+    def __init__(self,int:int):
+        self.timestamp = int
 
 class Job:
     """Job class"""
@@ -31,87 +85,87 @@ class Job:
         self.message = {}
         self.scheduled = ""
 
-    def setSourcePath(self, path:str):
+    # def setSourcePath(self, path:str):
 
-        # validate type: file
-        if self.source["type"] == "file":
-            # invalid file extension
-            ext = os.path.splitext(path)[-1].lower()
-            if not ext == ".csv":
-                raise typer.Exit("Invalid file extension.")
-            # invalid file path
-            if not os.path.isfile(path):
-                raise typer.Exit("Invalid file path.")
+    #     # validate type: file
+    #     if self.source["type"] == "file":
+    #         # invalid file extension
+    #         ext = os.path.splitext(path)[-1].lower()
+    #         if not ext == ".csv":
+    #             raise typer.Exit("Invalid file extension.")
+    #         # invalid file path
+    #         if not os.path.isfile(path):
+    #             raise typer.Exit("Invalid file path.")
             
-            self.source["path"] = path
-            # read data and set headers and recipients
-            with open(self.source["path"], newline='') as f:
-                reader = csv.DictReader(f, skipinitialspace=True)
-                self.headers = reader.fieldnames
-                for row in reader:
-                    self.recipients.append(row)
+    #         self.source["path"] = path
+    #         # read data and set headers and recipients
+    #         with open(self.source["path"], newline='') as f:
+    #             reader = csv.DictReader(f, skipinitialspace=True)
+    #             self.headers = reader.fieldnames
+    #             for row in reader:
+    #                 self.recipients.append(row)
 
-    def setEmailField(self, email):
-         # validate email field
-        if email not in self.headers:
-            raise typer.Exit("Invalid email_field. Terminating.")
+    # def setEmailField(self, email):
+    #      # validate email field
+    #     if email not in self.headers:
+    #         raise typer.Exit("Invalid email_field. Terminating.")
         
-        self.fields["email"] = email
+    #     self.fields["email"] = email
 
-    def setDataFields(self, fields):
-        # in case user enters data fields as comma separated string
-        if type(fields) is str:
-            # create list
-            fields_list = list(filter(None, fields.split(",")))
-            # filter all non-existing field names
-            data_fields = list(filter(lambda x: x in self.headers, fields_list))
+    # def setDataFields(self, fields):
+    #     # in case user enters data fields as comma separated string
+    #     if type(fields) is str:
+    #         # create list
+    #         fields_list = list(filter(None, fields.split(",")))
+    #         # filter all non-existing field names
+    #         data_fields = list(filter(lambda x: x in self.headers, fields_list))
 
-            if len(data_fields) < len(fields_list):
-                typer.echo("Notice: On or more data field(s) were not found in the source.")                        
+    #         if len(data_fields) < len(fields_list):
+    #             typer.echo("Notice: On or more data field(s) were not found in the source.")                        
 
-        elif type(fields) is list:
-            data_fields = fields
-        else:
-            raise Exception("Invalid data fields type")
+    #     elif type(fields) is list:
+    #         data_fields = fields
+    #     else:
+    #         raise Exception("Invalid data fields type")
         
-        self.fields["data"] = data_fields
+    #     self.fields["data"] = data_fields
 
-    def setMessage(self, msg: str):
-        message = msg.split(":")
+    # def setMessage(self, msg: str):
+    #     message = msg.split(":")
 
-        # validate message string 
-        if len(message) != 4:
-             raise typer.Exit("Invalid message string: [sender]:[format]:[source]:[content]")
+    #     # validate message string 
+    #     if len(message) != 4:
+    #          raise typer.Exit("Invalid message string: [sender]::[format]::[source]::[content]")
         
-        # validate message sender
-        if not re.match(r"^\S+@\S+\.\S+$", message[0]) :
-            raise typer.Exit("Invalid message sender. Use valid email address.")
+    #     # validate message sender
+    #     if not re.match(r"^\S+@\S+\.\S+$", message[0]) :
+    #         raise typer.Exit("Invalid message sender. Use valid email address.")
         
-        if message[1] not in ["txt", "html"]:
-            raise typer.Exit("Invalid message format. Use either 'txt' or 'html.")
+    #     if message[1] not in ["txt", "html"]:
+    #         raise typer.Exit("Invalid message format. Use either 'txt' or 'html.")
         
-        if message[2] not in ["stdin", "path"]:
-            raise typer.Exit("Invalid message source. Use either 'stdin' or 'path.")
+    #     if message[2] not in ["stdin", "path"]:
+    #         raise typer.Exit("Invalid message source. Use either 'stdin' or 'path.")
         
-        # add html validation if needed
+    #     # add html validation if needed
         
-        self.message = {
-            "sender": message[0],
-            "format": message[1],
-            "source": message[2],
-            "content": message[3]
-        }
+    #     self.message = {
+    #         "sender": message[0],
+    #         "format": message[1],
+    #         "source": message[2],
+    #         "content": message[3]
+    #     }
 
-    # tbd: check UTC timezone behaviour and adjust accordingly
-    # tbd: check if scheduled time is in future 
-    def setSchedule(self, date_str):
-        if date_str == "now":
-            self.scheduled = self.created
-        else: 
-            # tbd: date format validation
-            # exit if not YYYY-DD-MM hh:mm
-            _datetime = datetime.fromisoformat(date_str)
-            self.scheduled = int(datetime.timestamp(_datetime))
+    # # tbd: check UTC timezone behaviour and adjust accordingly
+    # # tbd: check if scheduled time is in future 
+    # def setSchedule(self, date_str):
+    #     if date_str == "now":
+    #         self.scheduled = self.created
+    #     else: 
+    #         # tbd: date format validation
+    #         # exit if not YYYY-DD-MM hh:mm
+    #         _datetime = datetime.fromisoformat(date_str)
+    #         self.scheduled = int(datetime.timestamp(_datetime))
 
 
     def getSummary(self):
