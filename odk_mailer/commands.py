@@ -2,18 +2,18 @@ import typer
 import sys
 from odk_mailer.lib import prompts, utils
 from odk_mailer.classes.recipients import Recipients 
-from odk_mailer.classes.mail_job import MailJob 
+from odk_mailer.classes.job import Job 
 
 
 def create(source_type, source_path, email_field, data_fields, message, schedule, force):
-    typer.echo(">>> Creating mail job")
+    typer.echo(">>> Creating a mail job")
 
     # prompt source type
     if not source_type:
         answer_source_type = prompts.source_type()
         source_type = answer_source_type["source_type"]
 
-    mailJob = MailJob(source_type)
+    mailJob = Job(source_type)
 
     # prompt source path
     if mailJob.source["type"] == 'file':
@@ -74,7 +74,7 @@ def create(source_type, source_path, email_field, data_fields, message, schedule
     # if not confirmed:
     #     raise typer.Exit("MailJob was not confirmed.")
 
-    mailJob._create()
+    mailJob.save()
 
     sys.exit()
 

@@ -9,13 +9,19 @@ import json
 import hashlib
 
 
-class MailJob:
+class Job:
+    """Job class"""
     def __init__(self, type: str):
+
         self.created = int(time.time())
         self.source = {
             "type": type,
             "path": ""
         }
+        self.raw = {
+            "headers": [],
+            "data": []
+        },
         self.headers = []
         self.recipients = []
         self.fields = {
@@ -25,11 +31,6 @@ class MailJob:
         self.message = {}
         self.scheduled = ""
 
-        #self.init()
-
-    def init(self):
-        self.created = int(time.time())
-
     def setSourcePath(self, path:str):
 
         # validate type: file
@@ -38,13 +39,12 @@ class MailJob:
             ext = os.path.splitext(path)[-1].lower()
             if not ext == ".csv":
                 raise typer.Exit("Invalid file extension.")
-
             # invalid file path
             if not os.path.isfile(path):
                 raise typer.Exit("Invalid file path.")
             
             self.source["path"] = path
-            # read data
+            # read data and set headers and recipients
             with open(self.source["path"], newline='') as f:
                 reader = csv.DictReader(f, skipinitialspace=True)
                 self.headers = reader.fieldnames
@@ -125,15 +125,15 @@ class MailJob:
         }
 
     # does two things: saves mailjob as <hash>.json and adds it as an entry to jobs.json with hash as id
-    def _create(self):
-        jobs_dir = globals.odk_mailer_path + '/jobs'
+    def save(self):
+        jobs_path = globals.odk_mailer_path + '/jobs'
         jobs_file = globals.odk_mailer_path + '/jobs.json'
 
         # get content as json
         content = json.dumps(self.getSummary(), ensure_ascii=True, indent=4)
         hash = hashlib.sha256(content.encode()).hexdigest()
 
-        with open(jobs_dir + '/'+hash+'.json', 'w', encoding='utf-8') as f:
+        with open(jobs_path + '/'+hash+'.json', 'w', encoding='utf-8') as f:
             f.write(content)
 
         # with open(jobs_file, "r+") as json_file:
@@ -141,7 +141,14 @@ class MailJob:
 
         with open(jobs_file, "r+") as json_file:
             jobs = json.load(json_file)
-            jobs.append({"hash": hash, "scheduled": self.scheduled, "state":0, "last_checked": ""})
+            jobs.append({
+                "hash": hash,
+                "scheduled": self.scheduled, 
+                "created": self.created,
+                "state":0
+            })
+            json_file.seek(0)
+            json_file.truncate()
             json_file.write(json.dumps(jobs))
 
         print("Success")

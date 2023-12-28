@@ -18,7 +18,7 @@ def init():
            jobs_db.write_text("[]")
 
         if not is_json(jobs_db.read_text()):
-            raise typer.Exit("Invalid JSON")    
+            raise typer.Exit("The jobs.json file is invalid JSON")    
 
 def is_json(myjson):
   try:
