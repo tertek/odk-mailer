@@ -1,6 +1,5 @@
-from inquirer import errors
 import inquirer
-from odk_mailer.lib import validators, utils
+from odk_mailer.lib import validators
 
 def source():
     questions = [
@@ -59,52 +58,6 @@ def fields(headers=[]):
         )        
     ]
     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
-
-
-# def source_type():
-#     questions = [
-#         inquirer.List('source_type', 
-#                     message="Select source type:",
-#                     choices= [
-#                         ("CSV file.", "file"),
-#                         ("ODK API", "api")
-#                     ],                      
-#                     carousel=True
-#         )
-#     ]
-#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
-
-# def source_path_file():
-#     # tbd: check if string is local file path or URL to remote CSV file in format https://*.<tld>/**/*.csv
-#     questions = [
-#         inquirer.Path('source_path_file',
-#                     message="Input local path to CSV file",
-#                     path_type=inquirer.Path.FILE,
-#                     exists=True,
-#                     normalize_to_absolute_path=True
-#         )
-#     ]
-#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
-
-# def email_field(headers=[]):
-#     questions = [
-#     inquirer.List('email_field',
-#                     message="What field should be used for sending emails?",
-#                     choices=headers,
-#                     default='email' if 'email' in headers else "",
-#                     carousel=True
-#                 ),
-#     ]
-#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
-
-# def data_fields(headers=[]):
-#     questions = [
-#         inquirer.Checkbox("data_fields", 
-#                     message="Select data field(s)",
-#                     choices=headers
-#         )
-#     ]
-#     return inquirer.prompt(questions, raise_keyboard_interrupt=True)
 
 def message():
     questions = [

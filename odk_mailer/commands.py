@@ -5,7 +5,6 @@ from odk_mailer.classes.job import Job
 
 
 def create(source, fields, message, schedule):
-    typer.echo(">>> Creating a mail job")
 
     if not source:
         p_source = prompts.source()
@@ -13,7 +12,6 @@ def create(source, fields, message, schedule):
     
     v_source = validators.source(source)
 
-    # Get raw data
     raw = utils.get_raw(v_source)
 
     if not fields:
@@ -36,26 +34,17 @@ def create(source, fields, message, schedule):
 
     v_schedule = validators.schedule(schedule)
 
+    # tbd: add reminders here
 
-    # mailJob.setSchedule(schedule)
-
-    #
-    # tbd: add reminders
-    #
-
-    # optional: confirm mailjob on summary
-    # utils.render_summary(mailJob)
-    # if not force:
-    #     answer_confirmed = prompts.confirm()
-    #     confirmed = answer_confirmed["confirm"]
-    # else: confirmed = force
-
-    # if not confirmed:
-    #     raise typer.Exit("MailJob was not confirmed.")
-
-    # mailJob.save()
-
-    # run mail job
+    job = Job(v_source, v_fields, v_message, v_schedule, raw)
+    
+    if "pytest" in sys.modules:
+        # testing
+        print(vars(job))
+        sys.exit()
+        
+    saved = job.save()
+    # run mail job with odk-mailer run <hash>
 
     sys.exit()
 
@@ -67,15 +56,8 @@ def create(source, fields, message, schedule):
     #     if not ignore_invalid_emails:
     #         raise typer.Exit("\nAborted.")
 
-
-    # Success
-    print(f"Success. Created job with {recipients.numEmails} mails to be sent.")        
-    typer.echo(recipients.data)
-
-    # Replace placeholder with variables using pyhton template engine
-    # We will need dictionary for that..
-
-    # finally store mail-tasks in a text file or JSON https://www.w3schools.com/python/python_json.asp
+    
+    # store mail-tasks in a text file or JSON https://www.w3schools.com/python/python_json.asp
     # https://stackoverflow.com/a/24608746/3127170
     # the task will be stored with final data
 
@@ -86,12 +68,23 @@ def create(source, fields, message, schedule):
     #   sender: <sndr>
     #   reminders: ...
     # }
-
-
+        
     # add cron-job via https://pypi.org/project/python-crontab/ and https://stackabuse.com/scheduling-jobs-with-python-crontab/
-    # We will need a single job, that checks every hour if we have open reminder tasks.
+    # We will need a single job, that checks every hour if we have open jobs (with reminder tasks.)
     # Process reminder tasks as follows: 
     # 1. Perform API request to calculate reminder recipients
     # 2. Send Emails based on calculated recipients
     # 3. Summarize progress
+
+
+    #
+    # odk-mailer run command <hash>
+    #
+
+    # 1. check if job exists under <hash>
+    # 2. get job details
+    # 3. replace placeholder in message with data (python template engine)
+    # 4. 
+
+
 
