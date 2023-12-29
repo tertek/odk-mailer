@@ -1,8 +1,42 @@
-import typer
 import sys
-from odk_mailer.lib import prompts, validators, utils, log
+import os
+import json
+from odk_mailer.lib import prompts, validators, utils, log, globals, mail
 from odk_mailer.classes.job import Job 
 
+def run(hash):
+    if not hash:
+        utils.abort("ID is required")
+
+    # get mail job by id
+    with open(globals.odk_mailer_jobs, "r") as f:
+        jobs = json.load(f)
+
+    found = next((obj for obj in jobs if obj["hash"] == hash), None)
+    if not found:
+        utils.abort("Job not found.")
+
+    # maybe better to check this later?
+    # if found["scheduled"] > utils.now():
+    #     utils.abort("Schedule is in future")
+    
+    path_jobs = os.path.join(globals.odk_mailer_job, hash+'.json')
+    with open(path_jobs, 'r', encoding='utf-8') as f:
+        job = json.load(f)
+
+    # generate mails: format contents
+    # instance of Mailer class: mailer = Mailer(job)
+    # mailer.send() iterates over recipients
+    # for now lets use lib.mail.py
+    message = job["message"]
+    recipients = job["recipients"]
+    print(message)
+    print(recipients)
+
+    # send
+    for recipient in recipients:
+        mail.send(recipient, message)
+    
 
 def create(source, fields, message, schedule):
 
@@ -55,8 +89,6 @@ def create(source, fields, message, schedule):
     
     #     if not ignore_invalid_emails:
     #         raise typer.Exit("\nAborted.")
-
-    
     # store mail-tasks in a text file or JSON https://www.w3schools.com/python/python_json.asp
     # https://stackoverflow.com/a/24608746/3127170
     # the task will be stored with final data

@@ -25,14 +25,14 @@ class Recipients:
 
     def init(self):
 
-        # invalid file extension
-        ext = os.path.splitext(self.path)[-1].lower()
-        if not ext == ".csv":
-            raise typer.Exit("Invalid file extension.")
+        # # invalid file extension
+        # ext = os.path.splitext(self.path)[-1].lower()
+        # if not ext == ".csv":
+        #     raise typer.Exit("Invalid file extension.")
 
-        # invalid file path
-        if not os.path.isfile(self.path):
-            raise typer.Exit("Invalid file path.")
+        # # invalid file path
+        # if not os.path.isfile(self.path):
+        #     raise typer.Exit("Invalid file path.")
 
         # read data
         with open(self.path, newline='') as f:
@@ -69,10 +69,10 @@ class Recipients:
 
         return self.isValid
 
-    def test_filling(self):
-        print(self.fieldnames)
-        print(f'file path is {self.path}')
+    # def test_filling(self):
+    #     print(self.fieldnames)
+    #     print(f'file path is {self.path}')
         
-        txt = "The firstname is {firstname}\n lastname is {lastname} \n email is {email} \n not filled {not_filled}"
-        for row in self.data:
-            print(txt.format_map(SafeDict(row)))
+    #     txt = "The firstname is {firstname}\n lastname is {lastname} \n email is {email} \n not filled {not_filled}"
+    #     for row in self.data:
+    #         print(txt.format_map(SafeDict(row)))

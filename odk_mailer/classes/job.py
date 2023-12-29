@@ -4,6 +4,7 @@ import time
 import json
 import hashlib
 from enum import Enum
+import os
 
 class JobType(Enum):
     FILE = 'file'
@@ -101,14 +102,13 @@ class Job:
     # does two things: saves mailjob as <hash>.json 
     # and adds it as an entry to jobs.json with hash as id
     def save(self):
-        jobs_path = globals.odk_mailer_path + '/jobs'
-        jobs_file = globals.odk_mailer_path + '/jobs.json'
 
         # save files
-        with open(jobs_path + '/'+self.hash+'.json', 'w', encoding='utf-8') as f:
+        path_to_job = os.path.join(globals.odk_mailer_job, self.hash+'.json')
+        with open(path_to_job, 'w', encoding='utf-8') as f:
             f.write(self.json)
 
-        with open(jobs_file, "r+") as f:
+        with open(globals.odk_mailer_jobs, "r+") as f:
             jobs = json.load(f)
             save_job = {
                 "hash": self.hash,

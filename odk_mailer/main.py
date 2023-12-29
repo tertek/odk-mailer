@@ -1,6 +1,6 @@
 import typer
+from typing_extensions import Annotated
 from odk_mailer import commands, before
-
 from odk_mailer.classes.odk_api import ODKClient
 
 app = typer.Typer(add_completion=False)
@@ -31,12 +31,21 @@ def create(
     commands.create(source, fields, message, schedule)
 
 @app.command()
+def run(
+    id: Annotated[str, typer.Argument(help="Hexadecimal hash")]
+):
+    """
+    Run a mail job by id
+    """
+    commands.run(id)
+
+@app.command()
 def list():
     """
     List available mail jobs
     """
     typer.echo("Listing mail jobs")
-    
+
 @app.command()
 def config():
     """
