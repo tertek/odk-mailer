@@ -1,3 +1,3 @@
-firstname, lastname, email
-foo,bar,foo@yahoo.com
-hoo,mar,hoo@gmail.com
+firstname, lastname, email, other
+foo,bar,foo@yahoo.com, baz
+hoo,mar,hoo@gmail.com, caz
