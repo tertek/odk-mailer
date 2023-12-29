@@ -68,7 +68,26 @@ def create(source, fields, message, schedule):
 
     v_schedule = validators.schedule(schedule)
 
-    # tbd: add reminders here
+    # tbd: Reminders
+    # reminders have two attributes:
+    # total_amount, frequency, e.g. 3 times in total, every hour|day|week|custom frequency
+    # after first scheduled send
+
+    # reminders will be stored inside .odk-mailer/reminder/hash_instance.json
+    # having updated recipients from non-respondents (calculated from base recipients and respondents) 
+    # on a per reminder case
+
+    # https://github.com/tertek/zapier-odk-scripts/blob/main/get_non_responding.py
+    # reminders require api connection and following inputs
+    # form_register = "test_form_register" #name of form that is used for registration, given as api or csv
+    # form_follow = "test_form_follow"  # name of form that is used for follow up
+    # # if use_form_attachment
+    # form_follow_attached = "test_form_follow_attached" # name of form that is used for follow up; 
+    # form_attachment = "follow.csv" # name of form attachment attached to form_follow; 
+    # # field config
+    # field_email_register = "email_register" # name of email field for registration form, given
+    # field_email_follow = "email_follow"
+    # field_email_follow_attach = "email"
 
     job = Job(v_source, v_fields, v_message, v_schedule, raw)
     
