@@ -12,15 +12,15 @@ def run(hash):
     with open(globals.odk_mailer_jobs, "r") as f:
         jobs = json.load(f)
 
-    found = next((obj for obj in jobs if obj["hash"] == hash), None)
+    found = next((obj for obj in jobs if obj["hash"].startswith(hash)), None)
     if not found:
         utils.abort("Job not found.")
-
+  
     # maybe better to check this later?
     # if found["scheduled"] > utils.now():
     #     utils.abort("Schedule is in future")
     
-    path_jobs = os.path.join(globals.odk_mailer_job, hash+'.json')
+    path_jobs = os.path.join(globals.odk_mailer_job, found['hash']+'.json')
     with open(path_jobs, 'r', encoding='utf-8') as f:
         job = json.load(f)
 
@@ -138,7 +138,7 @@ def create(source, fields, message, schedule):
     # 4. 
 
 def list():
-        
+
     with open(globals.odk_mailer_jobs, "r+") as f:
         jobs = json.load(f)
 
