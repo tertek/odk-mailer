@@ -47,6 +47,7 @@ def list():
     """    
     commands.list()
 
+
 # @app.command()
 # def config():
 #     """
