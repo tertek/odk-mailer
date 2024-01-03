@@ -137,5 +137,12 @@ def create(source, fields, message, schedule):
     # 3. replace placeholder in message with data (python template engine)
     # 4. 
 
+def list():
+        
+    with open(globals.odk_mailer_jobs, "r+") as f:
+        jobs = json.load(f)
+
+    utils.print_jobs(jobs)
+    
 
 

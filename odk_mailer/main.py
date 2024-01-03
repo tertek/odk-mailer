@@ -43,8 +43,8 @@ def run(
 def list():
     """
     List available mail jobs
-    """
-    typer.echo("Listing mail jobs")
+    """    
+    commands.list()
 
 @app.command()
 def config():

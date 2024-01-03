@@ -8,6 +8,8 @@ from rich.columns import Columns
 from rich.table import Table
 from rich.panel import Panel
 
+from datetime import datetime
+
 def abort(msg):
     print("[bold red]Error:[/bold red] "+msg)
     raise typer.Abort()
@@ -42,13 +44,39 @@ def get_raw(source):
     
     return { "headers": headers, "rows": rows}
 
-def render_table(header, body):
+def print_jobs(jobs):
     console = Console()
-
-    if header:
-        table = Table(*header)
-
-    for row in body:
+    header = ["Job Id", "Scheduled", "Created", "State"]
+    #header = jobs[0].keys()
+    table = Table(*header, expand=True, highlight=True, box=None, title_justify="left", show_lines="True")
+    console.print()
+    for job in jobs:
+        row = []
+        for key,val in job.items():
+            if key == 'hash':
+                row.append(val[:10])
+            if key in ['created','scheduled']:
+                dt = datetime.fromtimestamp(val)
+                row.append(dt.strftime("%c"))
+            if key == 'state':                
+                if val == 0:
+                    state = "[magenta]pending[/magenta]"
+                elif val == 1:
+                    state = "done"
+                else: state = "failed"
+                row.append(state)
         table.add_row(*row)
-    
+
     console.print(table)
+    console.print()
+
+# def render_table(header, body):
+#     console = Console()
+
+#     if header:
+#         table = Table(*header)
+
+#     for row in body:
+#         table.add_row(*row)
+    
+#     console.print(table)
