@@ -1,4 +1,5 @@
 import typer
+from typing import Optional
 from typing_extensions import Annotated
 from odk_mailer import commands, before
 from odk_mailer.classes.odk_api import ODKClient
@@ -21,10 +22,10 @@ def callback():
 
 @app.command()
 def create(
-    source: str = "",
-    fields: str = "",
-    message: str = "",
-    schedule: str = ""
+    source: Annotated[Optional[str], typer.Option("--source", "-s", help="Define source as [type]::[path]")]= "",
+    fields: Annotated[Optional[str], typer.Option("--fields", "-f", help="Define fields as [email]::[field_1],[field_2]")]= "",
+    message: Annotated[Optional[str], typer.Option("--message", "-m", help="Define message as [sender]::[format]::[type]::[content]")]= "",
+    schedule: Annotated[Optional[str], typer.Option("--schedule", help="Define schedule as 'now' or [time] in YYYY-MM-DD HH:mm")]= "",
 ):
     """
     Create a mail job.
