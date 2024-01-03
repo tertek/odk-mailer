@@ -4,7 +4,7 @@ import json
 from odk_mailer.lib import prompts, validators, utils, log, globals, mail
 from odk_mailer.classes.job import Job 
 
-def run(hash):
+def run(hash, dry=False):
     if not hash:
         utils.abort("ID is required")
 
@@ -15,14 +15,19 @@ def run(hash):
     found = next((obj for obj in jobs if obj["hash"].startswith(hash)), None)
     if not found:
         utils.abort("Job not found.")
-  
-    # maybe better to check this later?
+     
+    # check if ready to be sent
+    # simple check: scheduled <= now
+    # advan. check: hasReminders AND UnsentReminderTime <= now
+    
     # if found["scheduled"] > utils.now():
     #     utils.abort("Schedule is in future")
     
     path_jobs = os.path.join(globals.odk_mailer_job, found['hash']+'.json')
     with open(path_jobs, 'r', encoding='utf-8') as f:
         job = json.load(f)
+    
+    # in case we have a reminder case, generate reminder contents from reminders/hash_reminderId.json
 
     # generate mails: format contents
     # instance of Mailer class: mailer = Mailer(job)
@@ -30,26 +35,37 @@ def run(hash):
     # for now lets use lib.mail.py
     message = job["message"]
     recipients = job["recipients"]
-    print(message)
-    print(recipients)
 
-    # send
-    for recipient in recipients:
-        mail.send(recipient, message)
+    if dry:
+        print(message)
+        print(recipients)
+    else:
+        print(found['hash'])
+        print("================================================================")
+        print("Sending emails..")
+
+        # send reminder mails from reminders/hash_reminderId.json
+        # set reminderId to sent
+
+        # send
+        for recipient in recipients:
+            mail.send(recipient, message)
+        
+        print()
     
 
 def create(source, fields, message, schedule):
 
     if not source:
         p_source = prompts.source()
-        source  = utils.join(p_source)    
+        source  = utils.join(p_source)
     
     v_source = validators.source(source)
 
     raw = utils.get_raw(v_source)
 
     if not fields:
-        p_fields = prompts.fields(raw["headers"])    
+        p_fields = prompts.fields(raw["headers"])
         fields = utils.join(p_fields)
 
     v_fields = validators.fields(fields, raw["headers"])
@@ -58,7 +74,7 @@ def create(source, fields, message, schedule):
         p_message = prompts.message()
         message = utils.join(p_message)
 
-    v_message = validators.message(message)    
+    v_message = validators.message(message)
 
     if not schedule:
         p_schedule = prompts.schedule()
@@ -143,6 +159,41 @@ def list():
         jobs = json.load(f)
 
     utils.print_jobs(jobs)
-    
 
 
+def eval(dry=False):
+
+    with open(globals.odk_mailer_jobs, "r+") as f:
+        jobs = json.load(f)
+
+    evals = []
+
+    for job in jobs:
+        if job["scheduled"] <= utils.now():
+            # simple evaluation: check if scheduled time is smaller/equal to now
+            # if true, add to selected list
+            evals.append(job["hash"])
+
+        ###
+        # untested code, since reminders are not yet implemented in create command
+        elif "reminders" in job and len(job["reminders"]) > 0:
+            # advanced evaluation: addtionally check if job has reminder times that are smaller/equal to now
+            # if true, add to selected list
+            print("Addiitonally checking if we have any valid reminders")
+            for reminder in job["reminders"]:
+                if reminder["timestamp"] <= utils.now():
+                    evals.append(job["hash"])
+                    break
+        ###
+                
+        else:
+            # skipping this job since not qualified to be run
+            pass
+
+    if dry:
+        print(evals)
+        print(len(evals))
+
+    else:
+        for eval in evals:
+            run(eval)

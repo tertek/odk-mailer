@@ -44,10 +44,22 @@ def get_raw(source):
     
     return { "headers": headers, "rows": rows}
 
+def ts_to_str(ts):
+    dt = datetime.fromtimestamp(ts)
+    return dt.strftime("%c")
+
+def render_state(state):
+    match state:
+        case 0:
+            return "pending"
+        case 1: 
+            return "success"
+        case _:
+            return "failure"
+
 def print_jobs(jobs):
     console = Console()
     header = ["Job Id", "Scheduled", "Created", "State"]
-    #header = jobs[0].keys()
     table = Table(*header, expand=True, highlight=True, box=None, title_justify="left", show_lines="True")
     console.print()
     for job in jobs:
@@ -56,19 +68,13 @@ def print_jobs(jobs):
             if key == 'hash':
                 row.append(val[:10])
             if key in ['created','scheduled']:
-                dt = datetime.fromtimestamp(val)
-                row.append(dt.strftime("%c"))
-            if key == 'state':                
-                if val == 0:
-                    state = "[magenta]pending[/magenta]"
-                elif val == 1:
-                    state = "done"
-                else: state = "failed"
-                row.append(state)
+                row.append((ts_to_str(val)))
+            if key == 'state':
+                row.append(render_state(val))
         table.add_row(*row)
-
     console.print(table)
     console.print()
+
 
 # def render_table(header, body):
 #     console = Console()
