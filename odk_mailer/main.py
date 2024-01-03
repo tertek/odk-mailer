@@ -10,9 +10,11 @@ def callback():
     """
     ODK Mailer
 
-    Use it with the create command.
+    Setup mail jobs by fetching recipients from CSV files or ODK API.
 
-    A new mail job will be created for given SOURCE, FIELDS, MESSAGE and SCHEDULE.
+    Run mail jobs immediately or schedule them to be run over time.
+
+    Automatically send reminders to non-responding mail recipients.
     """
     # read config here from $HOME/.odk-mailer
     before.init()
@@ -26,7 +28,6 @@ def create(
 ):
     """
     Create a mail job.
-    If these are not entered, user will be prompted.
     """
     commands.create(source, fields, message, schedule)
 
@@ -46,26 +47,26 @@ def list():
     """    
     commands.list()
 
-@app.command()
-def config():
-    """
-    Configure ODK Mailer
-    """
-    typer.echo("Open configuration dialog if no config")
-@app.command()
-def api():
-    """
-    Send api request
-    """
-    typer.echo("api call")
+# @app.command()
+# def config():
+#     """
+#     Configure ODK Mailer
+#     """
+#     typer.echo("Open configuration dialog if no config")
+# @app.command()
+# def api():
+#     """
+#     Send api request
+#     """
+#     typer.echo("api call")
 
-    odk_client = ODKClient()
+#     odk_client = ODKClient()
 
-    # odk_client.auth()
+#     # odk_client.auth()
 
-    # odk_client.submissions_data()
+#     # odk_client.submissions_data()
 
-    odk_client.form_attachment()
+#     odk_client.form_attachment()
 
 
 
