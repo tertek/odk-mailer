@@ -47,7 +47,7 @@ list mail jobs
 - [x] Show available mail tasks (that are stored in the local db)
 
 delete mail jobs
-- [ ] change or delete available mail tasks
+- [x] delete mail job by id
 
 
 <!-- show queue:

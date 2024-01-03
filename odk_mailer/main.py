@@ -43,11 +43,20 @@ def run(
     commands.run(id, dry)
 
 @app.command()
+def delete(
+    id: Annotated[str, typer.Argument(help="Hexadecimal hash")]
+):
+    """
+    Delete Mail Job - also accepts shortened hash (id)
+    """
+    commands.delete(id)
+
+@app.command()
 def list():
     """
     List available mail jobs
     """    
-    commands.list()
+    commands.list_jobs()
 
 @app.command()
 def eval(
@@ -57,6 +66,8 @@ def eval(
     Evaluate mail jobs
     """
     commands.eval(dry)
+
+
 
 # @app.command()
 # def config():

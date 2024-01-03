@@ -52,7 +52,34 @@ def run(hash, dry=False):
             mail.send(recipient, message)
         
         print()
+
+def delete(hash):
+    if not hash:
+            utils.abort("ID is required")
+
+    with open(globals.odk_mailer_jobs, "r") as f:
+        jobs = json.load(f)
+
+    found = next((obj for obj in jobs if obj["hash"].startswith(hash)), None)
+
+    if not found:
+        utils.abort("Job not found.")
+   
+    # confirm
     
+    # deletion from /job/<hash>.json
+    path_job = os.path.join(globals.odk_mailer_job, found['hash']+'.json')
+    if os.path.exists(path_job):
+        os.remove(path_job)
+
+    # deletion from /jobs.json
+    jobs_updated = list(filter(lambda x: x['hash']!=found['hash'], jobs))   
+    
+    with open(globals.odk_mailer_jobs, "w") as f:
+        f.write(json.dumps(jobs_updated))
+
+    print("Deleted " + found['hash'])
+
 
 def create(source, fields, message, schedule):
 
@@ -153,7 +180,7 @@ def create(source, fields, message, schedule):
     # 3. replace placeholder in message with data (python template engine)
     # 4. 
 
-def list():
+def list_jobs():
 
     with open(globals.odk_mailer_jobs, "r+") as f:
         jobs = json.load(f)
