@@ -1,7 +1,7 @@
 import sys
 import os
 import json
-from odk_mailer.lib import db, prompts, validators, utils, log, globals, mail
+from odk_mailer.lib import db, prompts, validators, utils, log, globals, mail, smtp
 from odk_mailer.classes.job import Job 
 from odk_mailer.classes.mailer import Mailer
 
@@ -23,40 +23,8 @@ def run(hash, dry=False):
     #     utils.abort("Schedule is in future")
 
     mailer = Mailer(found['hash'])
-    #mailer.send(dry)
-
-    sys.exit()
-    
-    path_jobs = os.path.join(globals.odk_mailer_job, found['hash']+'.json')
-    with open(path_jobs, 'r', encoding='utf-8') as f:
-        job = json.load(f)
-    
+    mailer.send()
     # in case we have a reminder case, generate reminder contents from reminders/hash_reminderId.json
-
-    # generate mails: format contents
-    # instance of Mailer class: mailer = Mailer(job)
-    # mailer.send() iterates over recipients
-    # for now lets use lib.mail.py
-    message = job["message"]
-    recipients = job["recipients"]
-
-    if dry:
-        print(message)
-        print(recipients)
-    else:
-        print(found['hash'])
-        print("================================================================")
-        print("Sending emails..")
-
-        # send reminder mails from reminders/hash_reminderId.json
-        # set reminderId to sent
-
-        # send
-        for recipient in recipients:
-            mail.send(recipient, message)
-        
-        print()
-
 def delete(hash):
     if not hash:
             utils.abort("ID is required")
@@ -227,3 +195,6 @@ def eval(dry=False):
     else:
         for eval in evals:
             run(eval)
+
+def test():
+    smtp.send_mail("Test Mail", "odk-mailer@freesmtpservers.com", "hoo@nar.com", "Hello World")

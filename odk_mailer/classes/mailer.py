@@ -1,6 +1,6 @@
-from odk_mailer.lib import db
-from email.mime.text import MIMEText
-from smtplib import SMTP
+from odk_mailer.lib import db, smtp
+# from email.message import EmailMessage
+# from smtplib import SMTP
 import os
 
 # return unformatted string instead of raising error
@@ -27,44 +27,59 @@ class Mailer:
         self.hash = id
         
         job = db.getJob(self.hash)
-
-        print(job)
-
+        message = job["message"]
         # get all relevant stuff here
+        self.subject = "ODK-MAILER: New Mail Job" + self.hash
+        self.sender = message["sender"]
+        self.recipients = job["recipients"]
+        self.content = message["content"]
 
     def send(self, dry=False):
 
         print(self.hash)
         print("================================================================")
-        print("Sending emails..")
+        print("Sending emails..")    
+
+
+        # Prepare SMTP
+        smtp_host = 'smtp.freesmtpservers.com'
+        smtp_port = 25
+        smtp_username = ''
+        smtp_password = ''
 
         # Set SMTP 
         # https://docs.python.org/3/library/smtplib.html#smtplib.SMTP_SSL
         # https://docs.python.org/3/library/email.examples.html#email-examples
         # required smtp parameters
-        smtp_host = os.getenv('SMTP_HOST')
-        smtp_port = os.getenv('SMTP_PORT')
+        #smtp_host = os.getenv('SMTP_HOST')
+        #smtp_port = os.getenv('SMTP_PORT')
         #smtp_username = os.getenv('SMTP_USERNAME')
         #smtp_password = os.getenv('SMTP_PASSWORD')
 
         for recipient in self.recipients:
-            
-            print(f"Sending mail to {recipient['email']}")
+
+            # Prepare Message
             text = self.content
             
             message = text.format_map(SafeDict(recipient))
-            print(message)
 
-            # send_mail()
+            smtp.send_mail(self.subject,self.sender, recipient["email"], message)
+
+            # Prepare Email
+            # https://stackoverflow.com/a/58318206/3127170
+            # from email.message import EmailMessage
+            # from smtplib import SMTP
+            # construct email
+            # email = EmailMessage()
+            # email['Subject'] = self.subject
+            # email['From'] = self.sender
+            # email['To'] = recipient["email"]
+            # email.set_content(message, subtype='plain')
 
 
-
-            subject = "Email Subject"
-            body = "This is the body of the text message"
-            sender = "odk@swisspth.ch"
-            recipient = "foo@bar.com"
-
-            msg = MIMEText(body)
-            msg['Subject'] = subject
-            msg['From'] = sender
+            # # Send the message via local SMTP server.
+            # with SMTP(smtp_host, smtp_port) as s:
+            #     #s.login('foo_user', 'bar_password')
+            #     s.send_message(email)
+            #     print(f"Sending mail to {recipient['email']}")
 
