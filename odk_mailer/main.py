@@ -19,6 +19,7 @@ def callback():
     """
     # read config here from $HOME/.odk-mailer
     before.init()
+    before.boot()
 
 @app.command()
 def create(
@@ -67,7 +68,12 @@ def eval(
     """
     commands.eval(dry)
 
-
+@app.command()
+def test():
+    """
+    Test STMP connection
+    """
+    commands.test()
 
 # @app.command()
 # def config():

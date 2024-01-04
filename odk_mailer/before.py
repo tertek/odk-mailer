@@ -1,25 +1,39 @@
 from pathlib import Path
-from odk_mailer.lib import globals
+from odk_mailer.lib import globals, config
 import typer
 import json
 
 def init():
         
-        jobs_dir = Path(globals.odk_mailer_job)
-        jobs_dir.mkdir(parents=True, exist_ok=True)
+        # create config.toml if not exists
+        path_config  =  Path(globals.odk_mailer_config)
+        if not path_config.exists():
+            path_config.touch()
         
+        if path_config.stat().st_size == 0:
+           path_config.write_text("{}")
+
+        if not is_json(path_config.read_text()):
+            raise typer.Exit("The config.json file is invalid.\n" + path_config)        
+
+        # create job dir if not exists
+        path_job = Path(globals.odk_mailer_job)
+        path_job.mkdir(parents=True, exist_ok=True)
+        
+        # create jobs.json if not exists
         path_jobs = Path(globals.odk_mailer_jobs)
 
-        # create jobs.json if not exists
         if not path_jobs.exists():
             path_jobs.touch()
-            #jobs_db.write_text("Test")
 
         if path_jobs.stat().st_size == 0:
            path_jobs.write_text("[]")
 
         if not is_json(path_jobs.read_text()):
-            raise typer.Exit("The jobs.json file is invalid JSON")
+            raise typer.Exit("The jobs.json file is invalid.\n" + path_jobs)
+
+def boot():
+    config.load()
 
 def is_json(myjson):
   try:
