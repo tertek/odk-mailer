@@ -28,7 +28,7 @@ def create(
     schedule: Annotated[Optional[str], typer.Option("--schedule", help="Define schedule as 'now' or [time] in YYYY-MM-DD HH:mm")]= "",
 ):
     """
-    Create a mail job
+    Create mail job
     """
     commands.create(source, fields, message, schedule)
 
@@ -38,7 +38,7 @@ def run(
     dry: Annotated[bool, typer.Option("--dry", help="Dry run without sending mails.")] = False
 ):
     """
-    Run a mail job by hash - also accepts shortened hash (id)
+    Run mail job
     """
     commands.run(id, dry)
 
@@ -47,14 +47,14 @@ def delete(
     id: Annotated[str, typer.Argument(help="Hexadecimal hash")]
 ):
     """
-    Delete Mail Job - also accepts shortened hash (id)
+    Delete mail job
     """
     commands.delete(id)
 
 @app.command()
 def list():
     """
-    List available mail jobs
+    List mail jobs
     """    
     commands.list_jobs()
 

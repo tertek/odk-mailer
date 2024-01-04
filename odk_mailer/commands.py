@@ -1,16 +1,15 @@
 import sys
 import os
 import json
-from odk_mailer.lib import prompts, validators, utils, log, globals, mail
+from odk_mailer.lib import db, prompts, validators, utils, log, globals, mail
 from odk_mailer.classes.job import Job 
+from odk_mailer.classes.mailer import Mailer
 
 def run(hash, dry=False):
     if not hash:
         utils.abort("ID is required")
 
-    # get mail job by id
-    with open(globals.odk_mailer_jobs, "r") as f:
-        jobs = json.load(f)
+    jobs = db.getJobs()
 
     found = next((obj for obj in jobs if obj["hash"].startswith(hash)), None)
     if not found:
@@ -22,6 +21,11 @@ def run(hash, dry=False):
     
     # if found["scheduled"] > utils.now():
     #     utils.abort("Schedule is in future")
+
+    mailer = Mailer(found['hash'])
+    #mailer.send(dry)
+
+    sys.exit()
     
     path_jobs = os.path.join(globals.odk_mailer_job, found['hash']+'.json')
     with open(path_jobs, 'r', encoding='utf-8') as f:
@@ -57,15 +61,14 @@ def delete(hash):
     if not hash:
             utils.abort("ID is required")
 
-    with open(globals.odk_mailer_jobs, "r") as f:
-        jobs = json.load(f)
+    jobs = db.getJobs()
 
     found = next((obj for obj in jobs if obj["hash"].startswith(hash)), None)
 
     if not found:
         utils.abort("Job not found.")
    
-    # confirm
+    # tbd: confirm
     
     # deletion from /job/<hash>.json
     path_job = os.path.join(globals.odk_mailer_job, found['hash']+'.json')
@@ -85,7 +88,7 @@ def create(source, fields, message, schedule):
 
     if not source:
         p_source = prompts.source()
-        source  = utils.join(p_source)
+        source  = utils.join(p_source)  # stringify answers
     
     v_source = validators.source(source)
 

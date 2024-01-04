@@ -19,7 +19,7 @@ class Source:
     password: str
 
     def __init__(self, lst: []):
-        if not len(lst) in [2,6]:
+        if not len(lst) in [2,6]: 
             raise Exception("Source input must have length 2 or 6.")
         
         self.type = JobType(lst[0]).value
