@@ -1,19 +1,26 @@
 import sys
 import os
 import json
-from odk_mailer.lib import db, prompts, validators, utils, globals, smtp
+from odk_mailer.lib import prompts, validators, utils, globals, smtp
 from odk_mailer.classes.job import Job
 from odk_mailer.classes.mailer import Mailer
+from odk_mailer.classes.config import Config
 
-def run(hash, dry=False, verbose=False):
-    if not hash:
-        utils.abort("ID is required")
+# make config accessible in all commands
+odk_mailer_config = Config()
 
-    jobs = db.getJobs()
+def run(hash_or_id, dry=False, verbose=False):
+    if not hash_or_id:
+        utils.abort("ID/Hash is required")
 
-    found = next((obj for obj in jobs if obj["hash"].startswith(hash)), None)
+    with open(globals.odk_mailer_jobs, "r") as f:
+        jobs = json.load(f)
+
+    found = next((obj for obj in jobs if obj["hash"].startswith(hash_or_id)), None)
     if not found:
         utils.abort("Job not found.")
+
+    hash = found['hash']
      
     # check if ready to be sent
     # simple check: scheduled <= now
@@ -21,12 +28,8 @@ def run(hash, dry=False, verbose=False):
     
     # if found["scheduled"] > utils.now():
     #     utils.abort("Schedule is in future")
-        
-    if dry :
-        print(found['hash'])
-        sys.exit()
 
-    mailer = Mailer(found['hash'],verbose)
+    mailer = Mailer(hash, dry, verbose, odk_mailer_config)
     mailer.send()
     # in case we have a reminder case, generate reminder contents from reminders/hash_reminderId.json
 
@@ -36,7 +39,8 @@ def delete(hash):
     if not hash:
             utils.abort("ID is required")
 
-    jobs = db.getJobs()
+    with open(globals.odk_mailer_jobs, "r") as f:
+        jobs = json.load(f)
 
     found = next((obj for obj in jobs if obj["hash"].startswith(hash)), None)
 

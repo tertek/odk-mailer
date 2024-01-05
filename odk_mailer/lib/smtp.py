@@ -9,11 +9,6 @@ def send_mail(subject, sender, recipient, message, type='plain'):
     if not config:
         utils.abort("Config error.")
 
-    # smtp_host = 'smtp.freesmtpservers.com'
-    # smtp_port = 25
-    # smtp_username = ''
-    # smtp_password = ''
-
     email = EmailMessage()
     email['Subject'] = subject
     email['From'] = sender

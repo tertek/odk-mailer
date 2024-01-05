@@ -35,6 +35,7 @@ def init():
 
   if not is_json(path_jobs.read_text()):
       raise typer.Exit("The jobs.json file is invalid.\n" + path_jobs)
+  
 
 def is_json(myjson):
   try:

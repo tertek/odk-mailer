@@ -1,1 +1,1 @@
-from . import db, prompts, utils, log, smtp, globals
+from . import globals, prompts, utils, log, smtp
