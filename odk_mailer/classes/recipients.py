@@ -1,7 +1,5 @@
 import typer
-import os
 import csv
-from collections import defaultdict
 from email_validator import validate_email, EmailNotValidError
 
 # return unformatted string instead of raising error

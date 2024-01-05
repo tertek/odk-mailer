@@ -21,10 +21,17 @@ def run(hash, dry=False):
     
     # if found["scheduled"] > utils.now():
     #     utils.abort("Schedule is in future")
+        
+    if dry :
+        print(found['hash'])
+        sys.exit()
 
     mailer = Mailer(found['hash'])
     mailer.send()
     # in case we have a reminder case, generate reminder contents from reminders/hash_reminderId.json
+
+    # update job state: pending, success, errors
+
 def delete(hash):
     if not hash:
             utils.abort("ID is required")
@@ -111,9 +118,10 @@ def create(source, fields, message, schedule):
         sys.exit()
         
     saved = job.save()
-    # run mail job with odk-mailer run <hash>
 
-    sys.exit()
+    print()
+    print("Created " + saved["hash"])
+    print()
 
     # validate recipients and process invalid emails in case
     # if not recipients.validate(email_field):
@@ -159,7 +167,7 @@ def list_jobs():
     utils.print_jobs(jobs)
 
 
-def eval(dry=False):
+def evaluate(dry=False):
 
     with open(globals.odk_mailer_jobs, "r+") as f:
         jobs = json.load(f)
