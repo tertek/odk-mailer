@@ -15,7 +15,7 @@ def send_mail(subject, sender, recipient, message, type='plain'):
     email.set_content(message, subtype=type)
 
     try:
-        smtp = smtplib.SMTP()
+        smtp = smtplib.SMTP(timeout=5)
         smtp.set_debuglevel(2)
         smtp.connect(smtp_host, smtp_port)
         smtp.send_message(email)
