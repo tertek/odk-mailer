@@ -67,6 +67,9 @@ class Mailer:
             # enable debugging by CLI flag --debug
                 smtp.set_debuglevel(2)
             smtp.connect(globals.odk_mailer_config.smtp_host, globals.odk_mailer_config.smtp_port)
+
+            if hasattr(globals.odk_mailer_config, 'smtp_user') and hasattr(globals.odk_mailer_config, 'smtp_pass'):
+                smtp.login(globals.odk_mailer_config.smtp_user, globals.odk_mailer_config.smtp_pass)
             # if username and password are supplied, perform smtp.login()
             # requires additional actions, such as setting TLS or SSL
             smtp.send_message(email)
