@@ -5,7 +5,7 @@ from odk_mailer.lib import db, prompts, validators, utils, globals, smtp
 from odk_mailer.classes.job import Job
 from odk_mailer.classes.mailer import Mailer
 
-def run(hash, dry=False):
+def run(hash, dry=False, verbose=False):
     if not hash:
         utils.abort("ID is required")
 
@@ -26,7 +26,7 @@ def run(hash, dry=False):
         print(found['hash'])
         sys.exit()
 
-    mailer = Mailer(found['hash'])
+    mailer = Mailer(found['hash'],verbose)
     mailer.send()
     # in case we have a reminder case, generate reminder contents from reminders/hash_reminderId.json
 

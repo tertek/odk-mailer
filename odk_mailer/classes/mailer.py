@@ -23,9 +23,9 @@ class Mailer:
     sender: str
     headers: str
 
-    def __init__(self, id: str):
+    def __init__(self, id: str, verbose:bool):
         self.hash = id
-        
+        self.verbose = verbose
         job = db.getJob(self.hash)
 
         self.subject = "ODK-MAILER: New Mail Job" + self.hash # tbd: add text prompt, add to self.message
@@ -63,8 +63,9 @@ class Mailer:
 
         try:
             smtp = smtplib.SMTP(timeout=5)
+            if self.verbose:
             # enable debugging by CLI flag --debug
-            # smtp.set_debuglevel(2)
+                smtp.set_debuglevel(2)
             smtp.connect(globals.odk_mailer_config.smtp_host, globals.odk_mailer_config.smtp_port)
             # if username and password are supplied, perform smtp.login()
             # requires additional actions, such as setting TLS or SSL

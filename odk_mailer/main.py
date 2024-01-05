@@ -34,12 +34,13 @@ def create(
 @app.command()
 def run(
     id: Annotated[str, typer.Argument(help="Hexadecimal hash")],
-    dry: Annotated[bool, typer.Option("--dry", help="Dry run without sending mails.")] = False
+    dry: Annotated[bool, typer.Option("--dry", help="Dry run without sending mails.")] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", help="Print out smtp debugging information")] = False,
 ):
     """
     Run mail job
     """
-    commands.run(id, dry)
+    commands.run(id, dry, verbose)
 
 @app.command()
 def delete(
