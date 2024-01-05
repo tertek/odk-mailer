@@ -1,8 +1,8 @@
 import sys
 import os
 import json
-from odk_mailer.lib import db, prompts, validators, utils, log, globals, smtp
-from odk_mailer.classes.job import Job 
+from odk_mailer.lib import db, prompts, validators, utils, globals, smtp
+from odk_mailer.classes.job import Job
 from odk_mailer.classes.mailer import Mailer
 
 def run(hash, dry=False):
@@ -197,6 +197,5 @@ def eval(dry=False):
             run(eval)
 
 def test():
-
-
+    
     smtp.send_mail("Test Mail Belo", "odk-mailer@freesmtpservers.com", "hoo@nar.com", "Hello World")

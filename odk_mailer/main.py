@@ -2,7 +2,6 @@ import typer
 from typing import Optional
 from typing_extensions import Annotated
 from odk_mailer import commands, before
-from odk_mailer.classes.odk_api import ODKClient
 
 app = typer.Typer(add_completion=False)
 
@@ -19,7 +18,6 @@ def callback():
     """
     # read config here from $HOME/.odk-mailer
     before.init()
-    before.boot()
 
 @app.command()
 def create(
