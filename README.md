@@ -8,18 +8,36 @@ Built with Typer and packaged with Poetry.
 - PIP
 
 ## Setup
+**Install the cli via pip**
 ```bash
 pip install odk-mailer
 ```
 
+**Configuration example**
+Config location: `~/.odk-mailer/config.json`:
+```json
+{
+        "smtp_host": "smtp.freesmtpservers.com",
+        "smtp_port": "25",
+        "smtp_user": "optional",
+        "smtp_pass": "optional",
+
+        "odk_host":"https://your.odk-central.host.tld",
+}
+```
+
 ## Usage
+**Create and run a new mail job**
 ```bash
     # Create a new mail job with a unique ID
     odk-mailer create
 
     # Run the job by ID
     odk-mailer run <job-id>
+```
 
+**List mail jobs and evaluate them**
+```bash
     # Show all jobs
     odk-mailer list
 
