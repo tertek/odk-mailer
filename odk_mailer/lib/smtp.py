@@ -1,10 +1,13 @@
-from odk_mailer.lib import globals
+from odk_mailer.lib import globals, utils
 from email.message import EmailMessage
 import smtplib
 
 def send_mail(subject, sender, recipient, message, type='plain'):
 
     config = globals.odk_mailer_config
+
+    if not config:
+        utils.abort("Config error.")
 
     # smtp_host = 'smtp.freesmtpservers.com'
     # smtp_port = 25

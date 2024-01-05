@@ -4,8 +4,12 @@ import typer
 import json
 
 def init():
-        
-  # create config.toml if not exists
+
+  # create base dir if not exists
+  path_base = Path(globals.odk_mailer_base)
+  path_base.mkdir(parents=True, exist_ok=True)
+  
+  # create config.json if not exists
   path_config  =  Path(globals.path_config)
   if not path_config.exists():
       path_config.touch()
