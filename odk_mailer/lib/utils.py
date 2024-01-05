@@ -2,7 +2,6 @@ import typer
 import csv 
 import time
 from rich import print
-from rich import print_json
 from rich.console import Console
 from rich.columns import Columns
 from rich.table import Table

@@ -1,6 +1,7 @@
 import typer
 from typing import Optional
 from typing_extensions import Annotated
+
 from odk_mailer import commands, before
 
 app = typer.Typer(add_completion=False)

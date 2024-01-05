@@ -12,6 +12,4 @@ def getJobs():
 def getJob(hash):
     path_jobs = os.path.join(globals.odk_mailer_job, hash+'.json')
     with open(path_jobs, 'r', encoding='utf-8') as f:
-        return json.load(f, object_hook=lambda d: SimpleNamespace(**d))    
-
-
+        return json.load(f, object_hook=lambda d: SimpleNamespace(**d))
