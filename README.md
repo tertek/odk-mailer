@@ -24,7 +24,7 @@ pip install odk-mailer
     odk-mailer list
 
     # Run all jobs that are ready to be sent
-    odk-mailer eval
+    odk-mailer evaluate
 ```
 
 ## CLI Design
@@ -74,9 +74,10 @@ Building a Package - Guide: https://typer.tiangolo.com/tutorial/package/#create-
     poetry run odk-mailer 
 ```
 
-## Push to pypi
+**Push to PyPi**
 
 ```
     poetry build
     poetry publish
+    # requires credentials to be setup: poetry config pypi-token.pypi <my-token>
 ```

@@ -58,13 +58,13 @@ def list():
     commands.list_jobs()
 
 @app.command()
-def eval(
+def evaluate(
     dry: Annotated[bool, typer.Option("--dry", help="Dry run without sending mails.")] = False
 ):
     """
     Evaluate mail jobs
     """
-    commands.eval(dry)
+    commands.evaluate(dry)
 
 @app.command()
 def test():
