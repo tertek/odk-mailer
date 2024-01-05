@@ -1,6 +1,6 @@
-from odk_mailer.lib import db, smtp
-# from email.message import EmailMessage
-# from smtplib import SMTP
+from odk_mailer.lib import db, globals
+from email.message import EmailMessage
+import smtplib
 import os
 
 # return unformatted string instead of raising error
@@ -27,59 +27,56 @@ class Mailer:
         self.hash = id
         
         job = db.getJob(self.hash)
-        message = job["message"]
-        # get all relevant stuff here
-        self.subject = "ODK-MAILER: New Mail Job" + self.hash
-        self.sender = message["sender"]
-        self.recipients = job["recipients"]
-        self.content = message["content"]
+
+        self.subject = "ODK-MAILER: New Mail Job" + self.hash # tbd: add text prompt, add to self.message
+        self.message = job.message
+        self.recipients = job.recipients
 
     def send(self, dry=False):
 
         print(self.hash)
         print("================================================================")
-        print("Sending emails..")    
+        print("Sending emails..")
 
-
-        # Prepare SMTP
-        smtp_host = 'smtp.freesmtpservers.com'
-        smtp_port = 25
-        smtp_username = ''
-        smtp_password = ''
-
-        # Set SMTP 
-        # https://docs.python.org/3/library/smtplib.html#smtplib.SMTP_SSL
-        # https://docs.python.org/3/library/email.examples.html#email-examples
-        # required smtp parameters
-        #smtp_host = os.getenv('SMTP_HOST')
-        #smtp_port = os.getenv('SMTP_PORT')
-        #smtp_username = os.getenv('SMTP_USERNAME')
-        #smtp_password = os.getenv('SMTP_PASSWORD')
-
+        idx=0
         for recipient in self.recipients:
 
-            # Prepare Message
-            text = self.content
-            
-            message = text.format_map(SafeDict(recipient))
+            print()
+            print(f"(#{idx+1}) Attempting to send.. ")
+            text = self.message.content
+            # Prepare Message           
+            success = self.smtp(
+                recipient.email, 
+                text.format_map(SafeDict(vars(recipient)))
+            )
 
-            smtp.send_mail(self.subject,self.sender, recipient["email"], message)
-
-            # Prepare Email
-            # https://stackoverflow.com/a/58318206/3127170
-            # from email.message import EmailMessage
-            # from smtplib import SMTP
-            # construct email
-            # email = EmailMessage()
-            # email['Subject'] = self.subject
-            # email['From'] = self.sender
-            # email['To'] = recipient["email"]
-            # email.set_content(message, subtype='plain')
+            idx = idx + 1
 
 
-            # # Send the message via local SMTP server.
-            # with SMTP(smtp_host, smtp_port) as s:
-            #     #s.login('foo_user', 'bar_password')
-            #     s.send_message(email)
-            #     print(f"Sending mail to {recipient['email']}")
+    def smtp(self, recipient, message, type='plain'):
 
+        email = EmailMessage()
+        email['Subject'] = self.subject
+        email['From'] = self.message.sender
+        email['To'] = recipient
+        email.set_content(message, subtype=type)
+
+        try:
+            smtp = smtplib.SMTP(timeout=5)
+            # enable debugging by CLI flag --debug
+            # smtp.set_debuglevel(2)
+            smtp.connect(globals.odk_mailer_config.smtp_host, globals.odk_mailer_config.smtp_port)
+            # if username and password are supplied, perform smtp.login()
+            # requires additional actions, such as setting TLS or SSL
+            smtp.send_message(email)
+            smtp.quit()
+            # write into /log/timestamp_<hash>.log
+            # log.write("Successfully sent email to " + email["To"])
+            return True
+        except Exception as error:
+            # write into /log/timestamp_<hash>.log
+            # raise exception to interrupt loop
+            print(error)
+            print("Failed sending mail to: " + email['To'])
+            print()
+            return False
