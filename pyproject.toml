@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "odk-mailer"
-version = "0.2.2"
+version = "0.2.4"
 description = "A simple CLI for sending form related mails in the context of Open Data Kit (ODK) "
 authors = ["tertek <ekin.tertemiz@swisstph.ch>"]
 readme = "README.md"

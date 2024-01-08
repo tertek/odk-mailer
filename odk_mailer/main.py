@@ -71,11 +71,16 @@ def evaluate(
     commands.evaluate(dry)
 
 @app.command()
-def test():
+def test(
+    sender: Annotated[str, typer.Option("--sender")] = "odk-mailer@freesmtpservers.com",
+    recipient: Annotated[str, typer.Option("--recipient")] = "foo@bar.com",
+    host: Annotated[str, typer.Option("--host")] = "smtp.freesmtpservers.com",
+    port: Annotated[str, typer.Option("--port")] = "25"
+):
     """
     Test STMP connection
     """
-    commands.test()
+    commands.test(sender, recipient, host, port)
 
 # @app.command()
 # def config():

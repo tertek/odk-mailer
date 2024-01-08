@@ -211,6 +211,8 @@ def evaluate(dry=False):
         for eval in evals:
             run(eval)
 
-def test():
-    
-    smtp.send_mail("Test Mail Belo", "odk-mailer@freesmtpservers.com", "hoo@nar.com", "Hello World")
+def test(sender, recipient, host, port):
+    print()
+    print(f"Sending test mail from {sender} to:  {recipient} via: {host}:{port}")
+    print()
+    smtp.send_mail(sender, recipient, host, port)
