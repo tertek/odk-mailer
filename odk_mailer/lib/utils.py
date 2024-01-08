@@ -21,12 +21,14 @@ def join(answers):
     filtered = []
 
     for x in answers:
-        if answers[x] != None:
-            to_append = answers[x]
-            if type(answers[x]) is list:
-                to_append = ",".join(answers[x])
-                
-            filtered.append(to_append)
+        if answers[x] != None and answers[x] != '' and len(answers[x]) != 0:
+                to_append = answers[x]
+                if type(answers[x]) is list:
+                    to_append = ",".join(answers[x])
+
+                filtered.append(to_append)
+
+    print(filtered)
 
     return "::".join(filtered)
 

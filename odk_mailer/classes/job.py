@@ -88,8 +88,13 @@ class Job:
 
     def setRecipients(self, data):
         recipients = []
+        if "data" in self.fields:
+            data_fields = self.fields["data"]
+        else:
+            data_fields = []
+
         for row in data["rows"]:
-            f_row = {k: row[k] for k in self.fields["data"] + [self.fields["email"]]}
+            f_row = {k: row[k] for k in data_fields + [self.fields["email"]]}
             recipients.append(f_row)
         self.recipients = recipients
 

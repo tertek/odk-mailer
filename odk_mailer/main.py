@@ -78,7 +78,7 @@ def test(
     port: Annotated[str, typer.Option("--port")] = "25"
 ):
     """
-    Test STMP connection
+    Send test mail
     """
     commands.test(sender, recipient, host, port)
 
