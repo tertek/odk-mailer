@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "odk-mailer"
-version = "0.2.0"
+version = "0.2.2"
 description = "A simple CLI for sending form related mails in the context of Open Data Kit (ODK) "
 authors = ["tertek <ekin.tertemiz@swisstph.ch>"]
 readme = "README.md"
@@ -14,6 +14,7 @@ typer = {extras = ["all"], version = "^0.9.0"}
 inquirer = "^3.1.4"
 email-validator = "^2.1.0.post1"
 requests = "^2.31.0"
+toml = "^0.10.2"
 
 
 [tool.poetry.group.dev.dependencies]
