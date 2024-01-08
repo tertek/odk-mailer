@@ -10,6 +10,10 @@ from odk_mailer.classes.config import Config
 odk_mailer_config = Config()
 
 def run(hash_or_id, dry=False, verbose=False):
+
+    if not odk_mailer_config:
+        utils.abort("Cannot send emails without Config")
+
     if not hash_or_id:
         utils.abort("ID/Hash is required")
 
