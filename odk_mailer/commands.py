@@ -6,10 +6,9 @@ from odk_mailer.classes.job import Job
 from odk_mailer.classes.mailer import Mailer
 from odk_mailer.classes.config import Config
 
-# make config accessible in all commands
-odk_mailer_config = Config()
-
 def run(hash_or_id, dry=False, verbose=False):
+
+    odk_mailer_config = Config()
 
     if not odk_mailer_config:
         utils.abort("Cannot send emails without Config")
